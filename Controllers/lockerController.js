@@ -38,7 +38,10 @@ exports.getAllLockerByInstitue = catchAsync(async (req, res, next) => {
 
   rows = rows.map((row) => ({
     ...row,
-    institution: JSON.parse(row.institution),
+    institution:
+      typeof row.institution === "string"
+        ? JSON.parse(row.institution)
+        : row.institution,
   }));
 
   // logger.info({
@@ -99,7 +102,10 @@ exports.getLockerById = catchAsync(async (req, res) => {
 
   const locker = {
     ...rows[0],
-    institution: JSON.parse(rows[0].institution),
+    institution:
+      typeof rows[0].institution === "string"
+        ? JSON.parse(rows[0].institution)
+        : rows[0].institution,
   };
 
   // logger.info({

@@ -176,7 +176,7 @@ exports.userInfo = catchAsync(async (req, res, next) => {
 
   console.log("user", user);
 
-  const [rows] = await db.query(
+  let [rows] = await db.query(
     `
   SELECT 
     u.*, 
@@ -212,20 +212,26 @@ exports.userInfo = catchAsync(async (req, res, next) => {
     [user.id]
   );
 
-  // if (rows.length > 0 && typeof rows[0].institution === "string") {
-  //   rows[0].institution = JSON.parse(rows[0].institution);
-  // }
+  if (rows.length > 0) {
+    rows = rows.map((row) => ({
+      ...row,
+      institution:
+        typeof row.institution === "string"
+          ? JSON.parse(row.institution)
+          : row.institution,
+    }));
+  }
 
-  // const userObject = rows[0];
+  const userObject = rows[0];
 
-  // // Remove the password field if it exists
-  // if (userObject && userObject.password) {
-  //   delete userObject.password;
-  // }
+  // Remove the password field if it exists
+  if (userObject && userObject.password) {
+    delete userObject.password;
+  }
 
-  // if (!userObject) {
-  //   return res.status(404).json({ message: "user not found" });
-  // }
+  if (!userObject) {
+    return res.status(404).json({ message: "user not found" });
+  }
 
   return res.status(200).json({ status: "success", data: rows[0] });
 });
@@ -263,6 +269,7 @@ exports.updateUser = catchAsync(async (req, res) => {
     email,
     phone,
     password,
+    role,
     is_social,
     date_of_birth,
     social_uuid,
@@ -276,6 +283,8 @@ exports.updateUser = catchAsync(async (req, res) => {
   //   filepath: "authController.js",
   //   payload: JSON.stringify("start of the function"),
   // });
+
+  console.log("updatedUser", "Beginning of updateUser Function");
 
   const user = req.user;
 
@@ -293,7 +302,9 @@ exports.updateUser = catchAsync(async (req, res) => {
   const updatedUser = {
     name: name ? name[0] : existingUser.name,
     email: email ? email[0] : existingUser.email,
+    role: role ? role[0] : existingUser.role,
     phone: phone ? phone[0] : existingUser.phone,
+
     password: password
       ? await bcrypt.hash(password[0], 12)
       : existingUser.password,
@@ -307,6 +318,8 @@ exports.updateUser = catchAsync(async (req, res) => {
         ? institution_id[0]
         : existingUser.institution_id,
   };
+
+  console.log("updatedUser", updatedUser);
 
   await db.query(
     `

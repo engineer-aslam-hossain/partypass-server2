@@ -181,7 +181,10 @@ exports.userList = catchAsync(async (req, res, next) => {
 
   const formattedResults = results.map((result) => ({
     ...result,
-    institution: result.institution ? JSON.parse(result.institution) : null,
+    institution:
+      typeof result.institution === "string"
+        ? JSON.parse(result.institution)
+        : result.institution,
   }));
 
   // logger.info({
@@ -238,7 +241,10 @@ exports.userInfoById = catchAsync(async (req, res, next) => {
   );
 
   if (rows.length > 0 && rows[0].institution) {
-    rows[0].institution = JSON.parse(rows[0].institution);
+    rows[0].institution =
+      typeof rows[0].institution === "string"
+        ? JSON.parse(rows[0].institution)
+        : rows[0].institution;
   }
 
   const userObject = rows[0];

@@ -34,7 +34,10 @@ SELECT
 
   rows = rows.map((row) => ({
     ...row,
-    institution: JSON.parse(row.institution),
+    institution:
+      typeof row.institution === "string"
+        ? JSON.parse(row.institution)
+        : row.institution,
   }));
 
   // logger.info({
@@ -83,7 +86,10 @@ exports.getTicketTypeById = catchAsync(async (req, res) => {
   );
 
   if (rows.length > 0) {
-    rows[0].institution = JSON.parse(rows[0].institution);
+    rows[0].institution =
+      typeof rows[0].institution === "string"
+        ? JSON.parse(rows[0].institution)
+        : rows[0].institution;
   }
 
   if (rows.length === 0) {

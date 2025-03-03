@@ -34,18 +34,18 @@ async function checkConnection() {
     // Get a connection from the pool
     const connection = await dbConnection.getConnection();
 
-    // // Disable foreign key checks temporarily
+    // Disable foreign key checks temporarily
     // await connection.query("SET FOREIGN_KEY_CHECKS = 0");
 
-    // // Fetch all tables
+    // Fetch all tables
     // const [tables] = await connection.query("SHOW TABLES");
 
-    // // Generate a drop table query for each table
+    // Generate a drop table query for each table
     // const dropQueries = tables.map(
     //   (row) => `DROP TABLE IF EXISTS \`${Object.values(row)[0]}\``
     // );
 
-    // // Execute each drop table query individually
+    // Execute each drop table query individually
     // for (let query of dropQueries) {
     //   await connection.query(query);
     // }
@@ -57,7 +57,7 @@ async function checkConnection() {
     //   filepath: "db.js",
     // });
 
-    // // Re-enable foreign key checks
+    // Re-enable foreign key checks
     // await connection.query("SET FOREIGN_KEY_CHECKS = 1");
 
     // Table Identity Type creation if not exists
@@ -65,7 +65,9 @@ async function checkConnection() {
       CREATE TABLE IF NOT EXISTS identity_type (
         id INT AUTO_INCREMENT PRIMARY KEY,  -- Primary Key
         type_name VARCHAR(255),
-        requirement VARCHAR(255)
+        requirement VARCHAR(255),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       )`);
 
     // Table institution creation if not exists
@@ -80,7 +82,9 @@ async function checkConnection() {
         status INT NOT NULL,
         details TEXT,
         cover_photo VARCHAR(255),
-        video_link VARCHAR(255)
+        video_link VARCHAR(255),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       )`);
 
     // Table Locker creation if not exists
@@ -90,6 +94,8 @@ async function checkConnection() {
         institution_id INT,                        -- Foreign Key to institution
         locker_number INT,
         status INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (institution_id) REFERENCES institution(institution_id) ON DELETE CASCADE
       )`);
 
@@ -106,6 +112,8 @@ async function checkConnection() {
         institution_id INT,
         date_of_birth DATE,
         social_uuid VARCHAR(255),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (institution_id) REFERENCES institution(institution_id) ON DELETE CASCADE
       )`);
 
@@ -116,6 +124,8 @@ async function checkConnection() {
         user_id INT UNIQUE,                                 -- Foreign Key to user
         profile_pic VARCHAR(255),
         upload_date DATETIME NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
       )`);
 
@@ -130,6 +140,8 @@ async function checkConnection() {
         id_file1 VARCHAR(255),
         id_file2 VARCHAR(255),
         is_verified INT DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
         FOREIGN KEY (identity_type_id) REFERENCES identity_type(id) ON DELETE CASCADE
       )`);
@@ -148,6 +160,8 @@ async function checkConnection() {
         date DATE,
         start_datetime TIME,
         end_datetime TIME,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (institution_id) REFERENCES institution(institution_id) ON DELETE CASCADE
       )`);
 
@@ -163,6 +177,8 @@ async function checkConnection() {
         payment_status INT NOT NULL,
         payment_method ENUM('credit_card', 'paypal', 'bank_transfer') NOT NULL,
         ticket_status INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
         FOREIGN KEY (ticket_id) REFERENCES ticket_type(ticket_id) ON DELETE CASCADE
       )`);
@@ -175,7 +191,9 @@ async function checkConnection() {
         purchase_id INT,                     -- Foreign Key to Purchase
         allocation_date DATETIME NOT NULL,
         status INT NOT NULL,
-        FOREIGN KEY (locker_id) REFERENCES locker(locker_id) ON DELETE CASCADE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (locker_id) REFERENCES locker(id) ON DELETE CASCADE,
         FOREIGN KEY (purchase_id) REFERENCES purchase(purchase_id) ON DELETE CASCADE
       )`);
 
@@ -186,6 +204,9 @@ async function checkConnection() {
     //   filepath: "db.js",
     //   payload: JSON.stringify(process.env.DATABASE_USERNAME),
     // });
+
+    console.log("Connected to the MySQL database.");
+
     connection.release();
   } catch (err) {
     if (err.code === "ER_ACCESS_DENIED_ERROR") {
