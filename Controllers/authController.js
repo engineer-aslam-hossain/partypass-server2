@@ -322,7 +322,9 @@ exports.updateUser = catchAsync(async (req, res) => {
         : moment(date_of_birth[0]).format("YYYY-MM-DD HH:mm:ss"),
     social_uuid: social_uuid ? social_uuid[0] : existingUser.social_uuid,
     institution_id: institution_id
-      ? institution_id[0]
+      ? institution_id[0] == "null"
+        ? existingUser.institution_id
+        : institution_id[0]
       : existingUser.institution_id,
   };
 
@@ -436,7 +438,9 @@ exports.updateUserById = catchAsync(async (req, res) => {
         : moment(date_of_birth[0]).format("YYYY-MM-DD HH:mm:ss"),
     social_uuid: social_uuid ? social_uuid[0] : existingUser.social_uuid,
     institution_id: institution_id
-      ? institution_id[0]
+      ? institution_id[0] == "null"
+        ? existingUser.institution_id
+        : institution_id[0]
       : existingUser.institution_id,
   };
 
