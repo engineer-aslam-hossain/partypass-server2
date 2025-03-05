@@ -5,20 +5,17 @@ const authorize = require("../utils/authorize");
 const { upload } = require("../utils/upload");
 const institute_router = express.Router();
 
-institute_router
-  .route("/create")
-  .post(
-    authenticateJWT,
-    authorize("create", "Institution"),
-    upload.single("cover_photo"),
-    instituteController.createInstitution
-  );
+institute_router.route("/create").post(
+  authenticateJWT,
+  authorize("create", "Institution"),
+
+  instituteController.createInstitution
+);
 institute_router
   .route("/update/:id")
   .patch(
     authenticateJWT,
     authorize("update", "Institution"),
-    upload.single("cover_photo"),
     instituteController.updateInstitution
   );
 institute_router

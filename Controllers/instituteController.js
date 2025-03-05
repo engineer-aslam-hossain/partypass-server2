@@ -1,3 +1,4 @@
+const { asyncParse } = require("../utils/asyncParse");
 const db = require("../Configs/db"); // Import your database connection
 // const logger = require("../lib/logger");
 const catchAsync = require("../utils/catchAsync");
@@ -118,21 +119,23 @@ exports.createInstitution = catchAsync(async (req, res) => {
   //   filepath: "instituteController.js",
   //   payload: JSON.stringify(req.body),
   // });
+  const parsedData = await asyncParse(req);
+  const { fields, files } = parsedData;
 
-  const {
-    name,
-    email,
-    phone,
-    address,
-    map_location,
-    status,
-    details,
-    video_link,
-  } = req.body;
+  const name = fields.name ? fields.name[0] : null;
+  const email = fields.email ? fields.email[0] : null;
+  const phone = fields.phone ? fields.phone[0] : null;
+  const address = fields.address ? fields.address[0] : null;
+  const map_location = fields.map_location ? fields.map_location[0] : null;
+  const status = fields.status ? fields.status[0] : null;
+  const details = fields.details ? fields.details[0] : null;
+  const video_link = fields.video_link ? fields.video_link[0] : null;
+
+  console.log("fields", fields, "files", files);
 
   let coverPhotoUrl = null;
-  if (req.file) {
-    coverPhotoUrl = await imageUpload(req.file);
+  if (files?.cover_photo && files.cover_photo[0]) {
+    coverPhotoUrl = await imageUpload(files.cover_photo[0]);
   }
 
   // Validate input data
@@ -182,16 +185,24 @@ exports.createInstitution = catchAsync(async (req, res) => {
 // Update institution by ID
 exports.updateInstitution = catchAsync(async (req, res) => {
   const institutionId = req.params.id;
-  const {
-    name,
-    email,
-    phone,
-    address,
-    map_location,
-    status,
-    details,
-    video_link,
-  } = req.body;
+  const parsedData = await asyncParse(req);
+  const { fields, files } = parsedData;
+
+  const name = fields.name ? fields.name[0] : null;
+  const email = fields.email ? fields.email[0] : null;
+  const phone = fields.phone ? fields.phone[0] : null;
+  const address = fields.address ? fields.address[0] : null;
+  const map_location = fields.map_location ? fields.map_location[0] : null;
+  const status = fields.status ? fields.status[0] : null;
+  const details = fields.details ? fields.details[0] : null;
+  const video_link = fields.video_link ? fields.video_link[0] : null;
+
+  console.log("fields", fields, "files", files);
+
+  let coverPhotoUrl = null;
+  if (files?.cover_photo && files.cover_photo[0]) {
+    coverPhotoUrl = await imageUpload(files.cover_photo[0]);
+  }
 
   // logger.info({
   //   label: "info",
@@ -200,11 +211,6 @@ exports.updateInstitution = catchAsync(async (req, res) => {
   //   filepath: "instituteController.js",
   //   payload: JSON.stringify(institutionId),
   // });
-
-  let coverPhotoUrl = null;
-  if (req.file) {
-    coverPhotoUrl = await imageUpload(req.file);
-  }
 
   // Create an object of fields to update
   const fieldsToUpdate = {

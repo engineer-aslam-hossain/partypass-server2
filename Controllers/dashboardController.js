@@ -62,12 +62,12 @@ exports.getTotalCounter = catchAsync(async (req, res) => {
   res.status(200).json({
     status: "success",
     data: {
-      totalUsers: users[0].totalUsers,
-      totalInstitutions: institutions[0].totalInstitutions,
-      totalTicketsSold: ticketsSold[0].totalTicketsSold,
-      totalEvents: events[0].totalEvents,
-      totalRevenue: revenue[0].totalRevenue,
-      totalCustomers: customers[0].totalCustomers,
+      totalUsers: users[0].totalUsers ?? 0,
+      totalInstitutions: institutions[0].totalInstitutions ?? 0,
+      totalTicketsSold: ticketsSold[0].totalTicketsSold ?? 0,
+      totalEvents: events[0].totalEvents ?? 0,
+      totalRevenue: revenue[0].totalRevenue ?? 0,
+      totalCustomers: customers[0].totalCustomers ?? 0,
       upcomingEvents,
       bestSellingProducts,
     },

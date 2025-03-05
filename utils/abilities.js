@@ -18,6 +18,7 @@ const defineAbilitiesFor = (user) => {
     can("manage", "Locker");
     can("institute_list", "Purchase");
     can("read", "Purchase");
+    can("read", "Dashboard");
   } else if (user.role === 3) {
     can("read", "Event");
     can("update", "Event");

@@ -30,6 +30,8 @@ exports.createUser = catchAsync(async (req, res, next) => {
     institution_id,
   } = fields;
 
+  console.log("fields", fields);
+
   // logger.info({
   //   label: "info",
   //   message: `Beginning of createUser Function`,
@@ -69,9 +71,7 @@ exports.createUser = catchAsync(async (req, res, next) => {
       hashedPass,
       role ? role[0] : 3,
       is_social ? is_social[0] : false,
-      institution_id && (institution_id[0] === 0 || institution_id[0] === 1)
-        ? institution_id[0]
-        : null,
+      institution_id ? institution_id[0] : null,
       date_of_birth ? date_of_birth[0] : null,
       social_uuid ? social_uuid[0] : null,
     ]
@@ -313,10 +313,9 @@ exports.updateUser = catchAsync(async (req, res) => {
       ? date_of_birth[0]
       : existingUser.date_of_birth,
     social_uuid: social_uuid ? social_uuid[0] : existingUser.social_uuid,
-    institution_id:
-      institution_id && (institution_id[0] === 0 || institution_id[0] === 1)
-        ? institution_id[0]
-        : existingUser.institution_id,
+    institution_id: institution_id
+      ? institution_id[0]
+      : existingUser.institution_id,
   };
 
   console.log("updatedUser", updatedUser);
@@ -423,10 +422,9 @@ exports.updateUserById = catchAsync(async (req, res) => {
       ? date_of_birth[0]
       : existingUser.date_of_birth,
     social_uuid: social_uuid ? social_uuid[0] : existingUser.social_uuid,
-    institution_id:
-      institution_id && (institution_id[0] === 0 || institution_id[0] === 1)
-        ? institution_id[0]
-        : existingUser.institution_id,
+    institution_id: institution_id
+      ? institution_id[0]
+      : existingUser.institution_id,
   };
 
   await db.query(

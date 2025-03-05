@@ -84,6 +84,6 @@ user_router
 
 user_router
   .route("/dashboard/analytics")
-  .get(authenticateJWT, authorize("read", "System Admin"), getTotalCounter);
+  .get(authenticateJWT, authorize("read", "Dashboard"), getTotalCounter);
 
 module.exports = user_router;
