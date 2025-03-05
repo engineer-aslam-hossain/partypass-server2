@@ -1,6 +1,7 @@
 const db = require("../Configs/db"); // Import your database connection
 // const logger = require("../lib/logger");
 const catchAsync = require("../utils/catchAsync");
+const moment = require("moment");
 
 // Get all ticket types
 exports.getAllTicketTypes = catchAsync(async (req, res, next) => {
@@ -131,6 +132,8 @@ exports.createTicketType = catchAsync(async (req, res) => {
     benefits,
   } = req.body;
 
+  console.log("req.body", req.body);
+
   // logger.info({
   //   label: "info",
   //   message: `Creating a TicketType item`,
@@ -148,7 +151,9 @@ exports.createTicketType = catchAsync(async (req, res) => {
       price,
       capacity,
       is_regular,
-      date,
+      date === "" || date == null
+        ? null
+        : moment(date).format("YYYY-MM-DD HH:mm:ss"),
       start_datetime,
       end_datetime,
       benefits,
@@ -189,20 +194,49 @@ exports.updateTicketType = catchAsync(async (req, res) => {
     start_datetime,
     end_datetime,
     benefits,
+    institution_id,
   } = req.body;
 
+  const [existingTicketRows] = await db.query(
+    "SELECT * FROM ticket_type WHERE ticket_id = ?",
+    [ticketId]
+  );
+
+  if (existingTicketRows.length === 0) {
+    return res.status(404).json({ message: "Ticket type not found" });
+  }
+
+  const existingTicket = existingTicketRows[0];
+
+  const updatedTicket = {
+    name: name || existingTicket.name,
+    description: description || existingTicket.description,
+    price: price || existingTicket.price,
+    capacity: capacity || existingTicket.capacity,
+    is_regular: is_regular || existingTicket.is_regular,
+    date:
+      date === "" || date == null
+        ? existingTicket.date
+        : moment(date).format("YYYY-MM-DD HH:mm:ss"),
+    start_datetime: start_datetime || existingTicket.start_datetime,
+    end_datetime: end_datetime || existingTicket.end_datetime,
+    benefits: benefits || existingTicket.benefits,
+    institution_id: institution_id || existingTicket.institution_id,
+  };
+
   const [result] = await db.query(
-    "UPDATE ticket_type SET name = ?, description = ?, price = ?, capacity = ?, is_regular = ?, date = ?, start_datetime = ?, end_datetime = ?, benefits = ? WHERE ticket_id = ?",
+    "UPDATE ticket_type SET name = ?, description = ?, price = ?, capacity = ?, is_regular = ?, date = ?, start_datetime = ?, end_datetime = ?, benefits = ?, institution_id = ? WHERE ticket_id = ?",
     [
-      name,
-      description,
-      price,
-      capacity,
-      is_regular,
-      date,
-      start_datetime,
-      end_datetime,
-      benefits,
+      updatedTicket.name,
+      updatedTicket.description,
+      updatedTicket.price,
+      updatedTicket.capacity,
+      updatedTicket.is_regular,
+      updatedTicket.date,
+      updatedTicket.start_datetime,
+      updatedTicket.end_datetime,
+      updatedTicket.benefits,
+      updatedTicket.institution_id,
       ticketId,
     ]
   );

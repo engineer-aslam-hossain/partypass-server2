@@ -1,6 +1,7 @@
 const db = require("../Configs/db"); // Import your database connection
 // const logger = require("../lib/logger");
 const catchAsync = require("../utils/catchAsync");
+const moment = require("moment");
 
 // Get all Locker Allocation
 exports.getAllLockerAllocation = catchAsync(async (req, res, next) => {
@@ -52,7 +53,14 @@ exports.allocateLocker = catchAsync(async (req, res) => {
 
   await db.query(
     "INSERT INTO locker_allocation (purchase_id, locker_id, status, allocation_date) VALUES (?, ?, ?, ?)",
-    [purchase_id, locker_id, status, allocation_date]
+    [
+      purchase_id,
+      locker_id,
+      status,
+      allocation_date === "" || allocation_date == null
+        ? null
+        : moment(allocation_date).format("YYYY-MM-DD HH:mm:ss"),
+    ]
   );
 
   // logger.info({
@@ -83,7 +91,15 @@ exports.updateLockerAllocatioin = catchAsync(async (req, res) => {
 
   const [result] = await db.query(
     "UPDATE locker_allocation SET purchase_id = ?, locker_id = ?, status = ?, allocation_date = ? WHERE id = ?",
-    [purchase_id, locker_id, status, allocation_date, lockerAllocationId]
+    [
+      purchase_id,
+      locker_id,
+      status,
+      allocation_date === "" || allocation_date == null
+        ? null
+        : moment(allocation_date).format("YYYY-MM-DD HH:mm:ss"),
+      lockerAllocationId,
+    ]
   );
 
   if (result.affectedRows === 0) {

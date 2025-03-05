@@ -1,6 +1,7 @@
 const db = require("../Configs/db"); // Import your database connection
 // const logger = require("../lib/logger");
 const catchAsync = require("../utils/catchAsync");
+const moment = require("moment");
 
 // Get all purchases
 exports.getAllPurchases = catchAsync(async (req, res) => {
@@ -365,7 +366,9 @@ exports.createPurchase = catchAsync(async (req, res) => {
     [
       user_id,
       ticket_id,
-      ticket_date,
+      ticket_date === "" || ticket_date == null
+        ? null
+        : moment(ticket_date).format("YYYY-MM-DD HH:mm:ss"),
       price_amount,
       payment_status,
       payment_method,
@@ -408,7 +411,9 @@ exports.updatePurchase = catchAsync(async (req, res) => {
   const [result] = await db.query(
     "UPDATE purchase SET ticket_date = ?, price_amount = ?, payment_status = ?, payment_method = ?, ticket_status = ? WHERE purchase_id = ?",
     [
-      ticket_date,
+      ticket_date === "" || ticket_date == null
+        ? null
+        : moment(ticket_date).format("YYYY-MM-DD HH:mm:ss"),
       price_amount,
       payment_status,
       payment_method,

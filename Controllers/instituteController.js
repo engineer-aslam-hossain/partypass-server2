@@ -212,41 +212,44 @@ exports.updateInstitution = catchAsync(async (req, res) => {
   //   payload: JSON.stringify(institutionId),
   // });
 
-  // Create an object of fields to update
-  const fieldsToUpdate = {
-    name,
-    email,
-    phone,
-    address,
-    map_location,
-    status,
-    details,
-    video_link,
-    cover_photo: coverPhotoUrl,
-  };
-
-  // Filter out fields that are null or undefined
-  const updateFields = Object.keys(fieldsToUpdate).filter(
-    (key) => fieldsToUpdate[key] !== null && fieldsToUpdate[key] !== undefined
+  const [existingInstitutionRows] = await db.query(
+    "SELECT * FROM institution WHERE institution_id = ?",
+    [institutionId]
   );
 
-  if (updateFields.length === 0) {
-    return res.status(400).json({ message: "No fields to update" });
+  if (existingInstitutionRows.length === 0) {
+    return res.status(404).json({ message: "Institution not found" });
   }
 
-  // Build the SQL query dynamically
-  const updateQuery = `UPDATE institution SET ${updateFields
-    .map((field) => `${field} = ?`)
-    .join(", ")} WHERE institution_id = ?`;
+  const existingInstitution = existingInstitutionRows[0];
 
-  // Create the array of values for the SQL query
-  const updateValues = [
-    ...updateFields.map((field) => fieldsToUpdate[field]),
-    institutionId,
-  ];
+  const updatedInstitution = {
+    name: name || existingInstitution.name,
+    email: email || existingInstitution.email,
+    phone: phone || existingInstitution.phone,
+    address: address || existingInstitution.address,
+    map_location: map_location || existingInstitution.map_location,
+    status: status || existingInstitution.status,
+    details: details || existingInstitution.details,
+    video_link: video_link || existingInstitution.video_link,
+    cover_photo: coverPhotoUrl || existingInstitution.cover_photo,
+  };
 
-  // Execute the query
-  const [result] = await db.query(updateQuery, updateValues);
+  const [result] = await db.query(
+    "UPDATE institution SET name = ?, email = ?, phone = ?, address = ?, map_location = ?, status = ?, details = ?, video_link = ?, cover_photo = ? WHERE institution_id = ?",
+    [
+      updatedInstitution.name,
+      updatedInstitution.email,
+      updatedInstitution.phone,
+      updatedInstitution.address,
+      updatedInstitution.map_location,
+      updatedInstitution.status,
+      updatedInstitution.details,
+      updatedInstitution.video_link,
+      updatedInstitution.cover_photo,
+      institutionId,
+    ]
+  );
 
   if (result.affectedRows === 0) {
     // logger.info({

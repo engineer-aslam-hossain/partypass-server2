@@ -8,6 +8,7 @@ const bcrypt = require("bcrypt");
 // const logger = require("../lib/logger");
 const { imageUpload } = require("../utils/fileUpload");
 const { asyncParse } = require("../utils/asyncParse");
+const moment = require("moment");
 
 const signToken = (name, id, role, institution_id) => {
   return jwt.sign({ name, id, role, institution_id }, process.env.JWT_SECRET, {
@@ -71,8 +72,15 @@ exports.createUser = catchAsync(async (req, res, next) => {
       hashedPass,
       role ? role[0] : 3,
       is_social ? is_social[0] : false,
-      institution_id ? institution_id[0] : null,
-      date_of_birth ? date_of_birth[0] : null,
+      institution_id
+        ? institution_id[0] == "null"
+          ? null
+          : institution_id[0]
+        : null,
+
+      date_of_birth === "" || date_of_birth == null
+        ? null
+        : moment(date_of_birth).format("YYYY-MM-DD HH:mm:ss"),
       social_uuid ? social_uuid[0] : null,
     ]
   );
@@ -304,14 +312,14 @@ exports.updateUser = catchAsync(async (req, res) => {
     email: email ? email[0] : existingUser.email,
     role: role ? role[0] : existingUser.role,
     phone: phone ? phone[0] : existingUser.phone,
-
     password: password
       ? await bcrypt.hash(password[0], 12)
       : existingUser.password,
     is_social: is_social ? is_social[0] : existingUser.is_social,
-    date_of_birth: date_of_birth
-      ? date_of_birth[0]
-      : existingUser.date_of_birth,
+    date_of_birth:
+      date_of_birth === "" || date_of_birth == null
+        ? existingUser.date_of_birth
+        : moment(date_of_birth).format("YYYY-MM-DD HH:mm:ss"),
     social_uuid: social_uuid ? social_uuid[0] : existingUser.social_uuid,
     institution_id: institution_id
       ? institution_id[0]
@@ -375,6 +383,7 @@ exports.updateUser = catchAsync(async (req, res) => {
     message: "User Updated Successfully",
   });
 });
+
 exports.updateUserById = catchAsync(async (req, res) => {
   const { fields, files } = await asyncParse(req);
 
@@ -389,6 +398,9 @@ exports.updateUserById = catchAsync(async (req, res) => {
     social_uuid,
     institution_id,
   } = fields;
+
+  console.log("updatedUser", "Beginning of updateUser Function", fields);
+  console.log(moment(date_of_birth).format("YYYY-MM-DD HH:mm:ss"));
 
   const userId = req.params.id;
 
@@ -418,9 +430,10 @@ exports.updateUserById = catchAsync(async (req, res) => {
       : existingUser.password,
     role: role ? role[0] : existingUser.role,
     is_social: is_social ? is_social[0] : existingUser.is_social,
-    date_of_birth: date_of_birth
-      ? date_of_birth[0]
-      : existingUser.date_of_birth,
+    date_of_birth:
+      date_of_birth === "" || date_of_birth == null
+        ? existingUser.date_of_birth
+        : moment(date_of_birth).format("YYYY-MM-DD HH:mm:ss"),
     social_uuid: social_uuid ? social_uuid[0] : existingUser.social_uuid,
     institution_id: institution_id
       ? institution_id[0]
