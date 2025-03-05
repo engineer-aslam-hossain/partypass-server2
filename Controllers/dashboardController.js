@@ -11,6 +11,12 @@ exports.getTotalCounter = catchAsync(async (req, res) => {
   //   payload: JSON.stringify("start of the function"),
   // });
 
+  console.log("getTotalCounter", req.query?.institution_id);
+
+  if (req.query?.institution_id) {
+    //
+  }
+
   const [users] = await db.query(`SELECT COUNT(*) AS totalUsers FROM users`);
   const [institutions] = await db.query(
     `SELECT COUNT(*) AS totalInstitutions FROM institution`

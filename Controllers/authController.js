@@ -78,9 +78,9 @@ exports.createUser = catchAsync(async (req, res, next) => {
           : institution_id[0]
         : null,
 
-      date_of_birth === "" || date_of_birth == null
+      date_of_birth[0] === "" || date_of_birth[0] == null
         ? null
-        : moment(date_of_birth).format("YYYY-MM-DD HH:mm:ss"),
+        : moment(date_of_birth[0]).format("YYYY-MM-DD HH:mm:ss"),
       social_uuid ? social_uuid[0] : null,
     ]
   );
@@ -317,9 +317,9 @@ exports.updateUser = catchAsync(async (req, res) => {
       : existingUser.password,
     is_social: is_social ? is_social[0] : existingUser.is_social,
     date_of_birth:
-      date_of_birth === "" || date_of_birth == null
+      date_of_birth[0] === "" || date_of_birth[0] == null
         ? existingUser.date_of_birth
-        : moment(date_of_birth).format("YYYY-MM-DD HH:mm:ss"),
+        : moment(date_of_birth[0]).format("YYYY-MM-DD HH:mm:ss"),
     social_uuid: social_uuid ? social_uuid[0] : existingUser.social_uuid,
     institution_id: institution_id
       ? institution_id[0]
@@ -431,9 +431,9 @@ exports.updateUserById = catchAsync(async (req, res) => {
     role: role ? role[0] : existingUser.role,
     is_social: is_social ? is_social[0] : existingUser.is_social,
     date_of_birth:
-      date_of_birth === "" || date_of_birth == null
+      date_of_birth[0] === "" || date_of_birth[0] == null
         ? existingUser.date_of_birth
-        : moment(date_of_birth).format("YYYY-MM-DD HH:mm:ss"),
+        : moment(date_of_birth[0]).format("YYYY-MM-DD HH:mm:ss"),
     social_uuid: social_uuid ? social_uuid[0] : existingUser.social_uuid,
     institution_id: institution_id
       ? institution_id[0]
