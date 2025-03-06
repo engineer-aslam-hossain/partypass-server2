@@ -214,6 +214,7 @@ exports.getPurchaseListByInstituteId = catchAsync(async (req, res) => {
   return res.status(200).json({ status: "success", data: rows });
 });
 
+
 // Get purchase by ID
 exports.getPurchaseById = catchAsync(async (req, res) => {
   const purchaseId = req.params.id;
@@ -225,54 +226,61 @@ exports.getPurchaseById = catchAsync(async (req, res) => {
   //   payload: JSON.stringify(purchaseId),
   // });
 
-  const [rows] = await db.query(
-    `
-    SELECT 
-      p.*,
-      JSON_OBJECT(
-        'user_id', u.user_id,
-        'name', u.name,
-        'email', u.email,
-        'phone', u.phone,
-        'role', u.role,
-        'is_social', u.is_social,
-        'institution_id', u.institution_id,
-        'date_of_birth', u.date_of_birth,
-        'social_uuid', u.social_uuid
-      ) AS user,
-      JSON_OBJECT(
-        'ticket_id', tt.ticket_id,
-        'name', tt.name,
-        'description', tt.description,
-        'institution_id', tt.institution_id,
-        'price', tt.price,
-        'capacity', tt.capacity,
-        'benefits', tt.benefits,
-        'is_regular', tt.is_regular,
-        'date', tt.date,
-        'start_datetime', tt.start_datetime,
-        'end_datetime', tt.end_datetime,
-        'institution', JSON_OBJECT(
-          'institution_id', i.institution_id,
-          'name', i.name,
-          'email', i.email,
-          'phone', i.phone,
-          'address', i.address,
-          'map_location', i.map_location,
-          'status', i.status,
-          'details', i.details,
-          'cover_photo', i.cover_photo,
-          'video_link', i.video_link
-        )
-      ) AS ticket_type
-    FROM purchase p
-    LEFT JOIN ticket_type tt ON p.ticket_id = tt.ticket_id
-    LEFT JOIN institution i ON tt.institution_id = i.institution_id
-    LEFT JOIN users u ON p.user_id = u.user_id
-    WHERE p.purchase_id = ?
+const [rows] = await db.query(
+  `
+  SELECT 
+    p.*,
+    JSON_OBJECT(
+      'user_id', u.user_id,
+      'name', u.name,
+      'email', u.email,
+      'phone', u.phone,
+      'role', u.role,
+      'is_social', u.is_social,
+      'institution_id', u.institution_id,
+      'date_of_birth', u.date_of_birth,
+      'social_uuid', u.social_uuid
+    ) AS user,
+    JSON_OBJECT(
+      'ticket_id', tt.ticket_id,
+      'name', tt.name,
+      'description', tt.description,
+      'institution_id', tt.institution_id,
+      'price', tt.price,
+      'capacity', tt.capacity,
+      'benefits', tt.benefits,
+      'is_regular', tt.is_regular,
+      'date', tt.date,
+      'start_datetime', tt.start_datetime,
+      'end_datetime', tt.end_datetime,
+      'institution', JSON_OBJECT(
+        'institution_id', i.institution_id,
+        'name', i.name,
+        'email', i.email,
+        'phone', i.phone,
+        'address', i.address,
+        'map_location', i.map_location,
+        'status', i.status,
+        'details', i.details,
+        'cover_photo', i.cover_photo,
+        'video_link', i.video_link
+      )
+    ) AS ticket_type,
+    JSON_OBJECT(
+      'id', la.id,
+      'locker_id', la.locker_id,
+      'allocation_date', la.allocation_date,
+      'status', la.status
+    ) AS locker_allocation
+  FROM purchase p
+  LEFT JOIN ticket_type tt ON p.ticket_id = tt.ticket_id
+  LEFT JOIN institution i ON tt.institution_id = i.institution_id
+  LEFT JOIN users u ON p.user_id = u.user_id
+  LEFT JOIN locker_allocation la ON p.purchase_id = la.purchase_id
+  WHERE p.purchase_id = ?
   `,
-    [purchaseId]
-  );
+  [purchaseId]
+);
 
   if (!Array.isArray(rows)) {
     // logger.error("Expected an array for rows, but received: ", typeof rows);
@@ -281,22 +289,26 @@ exports.getPurchaseById = catchAsync(async (req, res) => {
       .json({ status: "error", message: "Internal server error" });
   }
 
-  if (rows.length > 0) {
-    rows.forEach((row) => {
-      if (row.ticket_type && typeof row.ticket_type === "string") {
-        row.ticket_type = JSON.parse(row.ticket_type);
-      }
-      if (
-        row.ticket_type.institution &&
-        typeof row.ticket_type.institution === "string"
-      ) {
-        row.ticket_type.institution = JSON.parse(row.ticket_type.institution);
-      }
-      if (row.user && typeof row.user === "string") {
-        row.user = JSON.parse(row.user);
-      }
-    });
-  }
+if (rows.length > 0) {
+  rows.forEach((row) => {
+    if (row.ticket_type && typeof row.ticket_type === "string") {
+      row.ticket_type = JSON.parse(row.ticket_type);
+    }
+    if (
+      row.ticket_type.institution &&
+      typeof row.ticket_type.institution === "string"
+    ) {
+      row.ticket_type.institution = JSON.parse(row.ticket_type.institution);
+    }
+    if (row.user && typeof row.user === "string") {
+      row.user = JSON.parse(row.user);
+    }
+    if (row.locker_allocation && typeof row.locker_allocation === "string") {
+      row.locker_allocation = JSON.parse(row.locker_allocation);
+    }
+  });
+}
+
 
   if (rows.length === 0) {
     // logger.info({
@@ -319,7 +331,6 @@ exports.getPurchaseById = catchAsync(async (req, res) => {
 
   return res.status(200).json({ status: "success", data: rows[0] });
 });
-
 // Create a new purchase
 exports.createPurchase = catchAsync(async (req, res) => {
   const {
